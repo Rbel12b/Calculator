@@ -1,0 +1,11 @@
+build
+Makefile
+*.o
+*.so
+*.a
+*.dSYM
+*.exe
+*.dll
+*.lib
+*.pdb
+*.class
