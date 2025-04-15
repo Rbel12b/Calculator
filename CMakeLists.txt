@@ -17,5 +17,11 @@ add_subdirectory(lib)
 # Specify the executable target
 add_executable(calculator ${SRC_FILES})
 
+# SDL2
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
+
 # Link the src library to the calculator executable
-target_link_libraries(calculator PRIVATE imgui)
+target_link_libraries(calculator PRIVATE
+    ${SDL2_LIBRARIES}
+    imgui)
