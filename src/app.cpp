@@ -38,6 +38,9 @@ int App::init(const char *windowTitle)
     {
         return -1;
     }
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.IniFilename = nullptr;
     running = true;
     return 0;
 }
@@ -75,10 +78,12 @@ void App::render()
     ImGui::SetNextWindowPos(ImVec2(0,0));
     ImGui::SetNextWindowSize(renderer.getWindowSize());
 
-    if (ImGui::Begin("mainWindow", nullptr, 
+    if (ImGui::Begin("mainWindow", nullptr,
         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
     {
-        ImGui::Text("Hello World!");
+        // Fill the entire window with a dock space
+        ImGuiID dockspace_id = ImGui::GetID("MainDockspace");
+        ImGui::DockSpace(dockspace_id);
     }
     ImGui::End();
 
