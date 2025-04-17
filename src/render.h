@@ -6,6 +6,7 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 #include <SDL2/SDL.h>
+#include <functional>
 
 class Renderer
 {
@@ -18,24 +19,24 @@ public:
     {
         if (running)
         {
-            Shutdown();
+            shutdown();
         }
     }
 
-    int Init(const char* windowTitle);
-    void BeginFrame();
-    void EndFrame();
-    void Shutdown();
-    void ProcessEvents();
-    bool IsRunning() const
+    int init(const char* windowTitle);
+    void beginFrame();
+    void endFrame();
+    void shutdown();
+    void processEvents();
+    bool isRunning() const
     {
         return running;
     }
-    void SetEventCallback(void (*callback)(SDL_Event &event))
+    void setEventCallback(std::function<void(SDL_Event&)> callback)
     {
         m_eventCallback = callback;
     }
-    ImVec2 GetWindowSize() const
+    ImVec2 getWindowSize() const
     {
         return ImVec2(windowWidth, windowHeight);
     }
@@ -45,7 +46,7 @@ private:
     SDL_Event event;
     SDL_Window *window;
     SDL_Renderer *renderer;
-    void (*m_eventCallback)(SDL_Event &event) = nullptr;
+    std::function<void(SDL_Event&)> m_eventCallback = nullptr;
 };
 
 #endif

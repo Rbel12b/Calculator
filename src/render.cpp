@@ -1,6 +1,6 @@
 #include "render.h"
 
-int Renderer::Init(const char* windowTitle)
+int Renderer::init(const char* windowTitle)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -30,7 +30,7 @@ int Renderer::Init(const char* windowTitle)
     return 0;
 }
 
-void Renderer::ProcessEvents()
+void Renderer::processEvents()
 {
     while (SDL_PollEvent(&event))
     {
@@ -51,14 +51,15 @@ void Renderer::ProcessEvents()
     }
 }
 
-void Renderer::BeginFrame()
+void Renderer::beginFrame()
 {
+    processEvents();
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 }
 
-void Renderer::EndFrame()
+void Renderer::endFrame()
 {
     ImGui::Render();
     SDL_SetRenderDrawColor(renderer, 114, 144, 154, 255);
@@ -67,7 +68,7 @@ void Renderer::EndFrame()
     SDL_RenderPresent(renderer);
 }
 
-void Renderer::Shutdown()
+void Renderer::shutdown()
 {
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
