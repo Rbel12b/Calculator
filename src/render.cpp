@@ -51,19 +51,15 @@ void Renderer::ProcessEvents()
     }
 }
 
-void Renderer::Render()
+void Renderer::BeginFrame()
 {
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
+}
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-    ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::Begin("main", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar);
-    ImGui::End();
-    ImGui::PopStyleVar(1);
-
+void Renderer::EndFrame()
+{
     ImGui::Render();
     SDL_SetRenderDrawColor(renderer, 114, 144, 154, 255);
     SDL_RenderClear(renderer);

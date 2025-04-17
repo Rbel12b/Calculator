@@ -11,7 +11,16 @@ int main(int, char **)
     while (renderer.IsRunning())
     {
         renderer.ProcessEvents();
-        renderer.Render();
+        renderer.BeginFrame();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+        ImGui::SetNextWindowSize(renderer.GetWindowSize());
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::Begin("main", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar);
+        ImGui::End();
+        ImGui::PopStyleVar(1);
+
+        renderer.EndFrame();
     }
     renderer.Shutdown();
     return 0;

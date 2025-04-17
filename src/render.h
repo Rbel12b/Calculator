@@ -23,7 +23,8 @@ public:
     }
 
     int Init(const char* windowTitle);
-    void Render();
+    void BeginFrame();
+    void EndFrame();
     void Shutdown();
     void ProcessEvents();
     bool IsRunning() const
@@ -33,6 +34,10 @@ public:
     void SetEventCallback(void (*callback)(SDL_Event &event))
     {
         m_eventCallback = callback;
+    }
+    ImVec2 GetWindowSize() const
+    {
+        return ImVec2(windowWidth, windowHeight);
     }
 private:
     bool running = false;
