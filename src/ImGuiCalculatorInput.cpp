@@ -35,10 +35,10 @@ std::unordered_map<ImGuiID, CalcInputData> ImGuiCalculatorInput::inputData;
 
 std::vector<ImGuiCalculatorInput::InputRow> ImGuiCalculatorInput::inputRows = {
     {keyData("(", '('), keyData(")", ')'), keyData(u8"\u232B", '\b')},
-    {keyData("7", '7'), keyData("8", '8'), keyData("9", '9')},
-    {keyData("4", '4'), keyData("5", '5'), keyData("6", '6')},
-    {keyData("1", '1'), keyData("2", '2'), keyData("3", '3')},
-    {keyData("0", '0'), keyData(".", '.'), keyData("=", '=')}};
+    {keyData("7", '7'), keyData("8", '8'), keyData("9", '9'), keyData("÷", '/')},
+    {keyData("4", '4'), keyData("5", '5'), keyData("6", '6'), keyData("×", '*')},
+    {keyData("1", '1'), keyData("2", '2'), keyData("3", '3'), keyData("+", '+')},
+    {keyData("0", '0'), keyData(".", '.'), keyData("=", '='), keyData("-", '-')}};
 
 bool ImGuiCalculatorInput::fontsReady = false;
 ImFont* ImGuiCalculatorInput::font13 = nullptr; // Default size (13.0f)
@@ -91,10 +91,12 @@ void ImGuiCalculatorInput::render(const char *name, ImGuiID id, bool useImGuiBeg
     {
         return;
     }
+    auto &io = ImGui::GetIO();
     if (inputData.find(id) == inputData.end())
     {
         inputData[id] = CalcInputData();
     }
+    auto &data = inputData[id];
     bool display = true;
     if (useImGuiBegin)
     {
@@ -103,6 +105,30 @@ void ImGuiCalculatorInput::render(const char *name, ImGuiID id, bool useImGuiBeg
     ImGui::PushID(ImGui::GetID("calcChild"));
     if (display && ImGui::BeginChild(ImGui::GetID(name), ImVec2(0, 0), childFlags, flags))
     {
+        if (!io.WantCaptureKeyboard && ImGui::IsWindowFocused())
+        {
+            for (int i = 0; i < io.InputQueueCharacters.Size; ++i)
+            {
+                ImWchar c = io.InputQueueCharacters[i];
+
+                if (c == '\r' || c == '\n' || c == '=')
+                {
+                    data.enterPressed = true;
+                }
+                else
+                {
+                    data.text += (char)c;
+                    data.enterPressed = false;
+                }
+            }
+
+            if (ImGui::IsKeyPressed(ImGuiKey_Backspace) && !inputData[id].text.empty())
+            {
+                inputData[id].text.pop_back();
+            }
+
+            io.InputQueueCharacters.resize(0); // clear the queue after processing
+        }
         _render(id);
     }
     if (display)
@@ -174,10 +200,16 @@ void ImGuiCalculatorInput::_render(ImGuiID id)
                         {
                             data.text.pop_back();
                         }
+                        data.enterPressed = false;
+                    }
+                    else if (key.encoded == '=')
+                    {
+                        data.enterPressed = true;
                     }
                     else
                     {
                         data.text += key.encoded;
+                        data.enterPressed = false;
                     }
                 }
             }
