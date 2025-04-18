@@ -1,9 +1,9 @@
 /*
  * -----------------------------------------------------------------------------
- *  File:           app.h
+ *  File:           ImGuiCalculatorImput.h
  *  Project:        Calculator
  *  Author:         Rbel12b (https::/github.com/rbel12b)
- *  Description:    main App class
+ *  Description:    a numpad input imlementation for imgui
  * -----------------------------------------------------------------------------
  *  License:        MIT License
  *
@@ -29,32 +29,60 @@
  * -----------------------------------------------------------------------------
  */
 #pragma once
-#ifndef _APP_H_
-#define _APP_H_
+#ifndef _IMGUI_CALCULATOR_INPUT_H_
+#define _IMGUI_CALCULATOR_INPUT_H_
 
-#include "render.h"
+#include <string>
+#include <imgui.h>
+#include <unordered_map>
+#include <vector>
 
-class App
+struct CalcInputData
+{
+    std::string text;
+    bool enterPressed = false;
+};
+
+class ImGuiCalculatorInput
 {
 public:
-    App(){}
-    ~App()
-    {
-        if (running)
-        {
-            shutdown();
-        }
-    }
+    static void init();
+    static void render(const char *name, ImGuiID id, bool useImGuiBegin = true,
+                       ImGuiWindowFlags flags = 0, ImGuiChildFlags childFlags = 0);
+    static CalcInputData getInput(ImGuiID id);
 
-    int init(const char* windowTitle);
-    int run();
-    void shutdown();
 private:
-    void processEvents(SDL_Event &event);
-    void render();
+    static void _render(ImGuiID id);
+
 private:
-    bool running = false;
-    Renderer renderer;
-    const int frame_time_ms = 1000 / 60;
+    static std::unordered_map<ImGuiID, CalcInputData> inputData;
+
+    struct keyData
+    {
+        bool exists = true;
+        std::string text;
+        char encoded;
+        keyData()
+            : exists(false)
+        {
+        }
+        keyData(std::string _text, char _c)
+            : exists(true), text(_text), encoded(_c)
+        {
+        }
+    };
+
+    typedef std::vector<keyData> InputRow;
+    static std::vector<InputRow> inputRows;
+    static bool fontsReady;
+    static ImFont* font13; // Default size (13.0f)
+    static ImFont* font18;
+    static ImFont* font26;
+    static ImFont* font32;
+    static ImFont* font30;
+    static ImFont* font40;
+    static ImFont* font48;
+    static ImFont* font60;
 };
+
 #endif

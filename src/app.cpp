@@ -30,6 +30,9 @@
  */
 #include "app.h"
 #include <functional>
+#include "ImGuiCalculatorInput.h"
+#include <chrono>
+#include <thread>
 
 int App::init(const char *windowTitle)
 {
@@ -41,6 +44,7 @@ int App::init(const char *windowTitle)
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.IniFilename = nullptr;
+    ImGuiCalculatorInput::init();
     running = true;
     return 0;
 }
@@ -49,10 +53,16 @@ int App::run()
 {
     while (running && renderer.isRunning())
     {
+        auto start = std::chrono::high_resolution_clock::now();
         renderer.processEvents();
         renderer.beginFrame();
         render();
         renderer.endFrame();
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if (elapsed < frame_time_ms) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(frame_time_ms - elapsed));
+        }
     }
     shutdown();
     return 0;
@@ -86,6 +96,8 @@ void App::render()
         ImGui::DockSpace(dockspace_id);
     }
     ImGui::End();
+
+    ImGuiCalculatorInput::render("calc", ImGui::GetID("calc"));
 
     ImGui::PopStyleVar(1);
 }
