@@ -43,7 +43,7 @@ int App::init(const char *windowTitle)
     }
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.IniFilename = nullptr;
+    // io.IniFilename = nullptr;
     ImGuiCalculatorInput::init();
     running = true;
     return 0;
