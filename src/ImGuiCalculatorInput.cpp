@@ -31,197 +31,207 @@
 #include "ImGuiCalculatorInput.h"
 #include "dejavusans_ttf.h" 
 
-std::unordered_map<ImGuiID, CalcInputData> ImGuiCalculatorInput::inputData;
-
-std::vector<ImGuiCalculatorInput::InputRow> ImGuiCalculatorInput::inputRows = {
-    {keyData("(", '('), keyData(")", ')'), keyData(u8"\u232B", '\b')},
-    {keyData("7", '7'), keyData("8", '8'), keyData("9", '9'), keyData("÷", '/')},
-    {keyData("4", '4'), keyData("5", '5'), keyData("6", '6'), keyData("×", '*')},
-    {keyData("1", '1'), keyData("2", '2'), keyData("3", '3'), keyData("+", '+')},
-    {keyData("0", '0'), keyData(".", '.'), keyData("=", '='), keyData("-", '-')}};
-
-bool ImGuiCalculatorInput::fontsReady = false;
-ImFont* ImGuiCalculatorInput::font13 = nullptr; // Default size (13.0f)
-ImFont* ImGuiCalculatorInput::font18 = nullptr;
-ImFont* ImGuiCalculatorInput::font26 = nullptr;
-ImFont* ImGuiCalculatorInput::font32 = nullptr;
-ImFont* ImGuiCalculatorInput::font40 = nullptr;
-ImFont* ImGuiCalculatorInput::font48 = nullptr;
-ImFont* ImGuiCalculatorInput::font60 = nullptr;
-
-void ImGuiCalculatorInput::init()
+namespace ImGuiCalculatorInput
 {
-    if (!fontsReady)
-    {
-        ImGuiIO& io = ImGui::GetIO();
+    std::unordered_map<ImGuiID, CalcInputData> inputData;
 
-        static const ImWchar ranges[] = {
-            0x0020, 0x00FF, // Basic Latin + Latin Supplement
-            0x2200, 0x22FF, // Mathematical Operators
-            0x2300, 0x23FF, // Misc Technical (⌫ is here at U+232B)
-            0,             // End of ranges
-        };
-        ImFontConfig config;
-        config.FontDataOwnedByAtlas = false; // Don't let ImGui free the memory
+    std::vector<InputRow> inputRows = {
+        {keyData("(", '('), keyData(")", ')'), keyData(u8"\u232B", '\b')},
+        {keyData("7", '7'), keyData("8", '8'), keyData("9", '9'), keyData("÷", '/')},
+        {keyData("4", '4'), keyData("5", '5'), keyData("6", '6'), keyData("×", '*')},
+        {keyData("1", '1'), keyData("2", '2'), keyData("3", '3'), keyData("+", '+')},
+        {keyData("0", '0'), keyData(".", '.'), keyData("=", '='), keyData("-", '-')},
+    };
 
-        config.SizePixels = 13.0f;
-        font13 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 13.0f, &config, ranges);
-        config.SizePixels = 18.0f;
-        font18 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 18.0f, &config, ranges);
-        config.SizePixels = 26.0f;
-        font26 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 26.0f, &config, ranges);
-        config.SizePixels = 32.0f;
-        font32 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 32.0f, &config, ranges);
-        config.SizePixels = 40.0f;
-        font40 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 40.0f, &config, ranges);
-        config.SizePixels = 48.0f;
-        font48 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 48.0f, &config, ranges);
-        config.SizePixels = 60.0f;
-        font60 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 60.0f, &config, ranges);
+    bool fontsReady = false;
+    ImFont* font13 = nullptr;
+    ImFont* font18 = nullptr;
+    ImFont* font26 = nullptr;
+    ImFont* font32 = nullptr;
+    ImFont* font30 = nullptr;
+    ImFont* font40 = nullptr;
+    ImFont* font48 = nullptr;
+    ImFont* font60 = nullptr;
 
-        io.Fonts->Build();
-        fontsReady = true;
-    }
-}
-
-void ImGuiCalculatorInput::render(const char *name, ImGuiID id, bool useImGuiBegin,
-                                  ImGuiWindowFlags flags, ImGuiChildFlags childFlags)
-{
-    if (!fontsReady)
+    void init()
     {
-        return;
-    }
-    auto &io = ImGui::GetIO();
-    if (inputData.find(id) == inputData.end())
-    {
-        inputData[id] = CalcInputData();
-    }
-    auto &data = inputData[id];
-    bool display = true;
-    if (useImGuiBegin)
-    {
-        display = ImGui::Begin(name, nullptr, flags);
-    }
-    ImGui::PushID(ImGui::GetID("calcChild"));
-    if (display && ImGui::BeginChild(ImGui::GetID(name), ImVec2(0, 0), childFlags, flags))
-    {
-        if (!io.WantCaptureKeyboard && ImGui::IsWindowFocused())
+        if (!fontsReady)
         {
-            for (int i = 0; i < io.InputQueueCharacters.Size; ++i)
-            {
-                ImWchar c = io.InputQueueCharacters[i];
+            ImGuiIO& io = ImGui::GetIO();
 
-                if (c == '\r' || c == '\n' || c == '=')
-                {
-                    data.enterPressed = true;
-                }
-                else
-                {
-                    data.text += (char)c;
-                    data.enterPressed = false;
-                }
-            }
+            static const ImWchar ranges[] = {
+                0x0020, 0x00FF, // Basic Latin + Latin Supplement
+                0x2200, 0x22FF, // Mathematical Operators
+                0x2300, 0x23FF, // Misc Technical (⌫ is here at U+232B)
+                0,             // End of ranges
+            };
+            ImFontConfig config;
+            config.FontDataOwnedByAtlas = false; // Don't let ImGui free the memory
 
-            if (ImGui::IsKeyPressed(ImGuiKey_Backspace) && !inputData[id].text.empty())
-            {
-                inputData[id].text.pop_back();
-            }
+            config.SizePixels = 13.0f;
+            font13 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 13.0f, &config, ranges);
+            config.SizePixels = 18.0f;
+            font18 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 18.0f, &config, ranges);
+            config.SizePixels = 26.0f;
+            font26 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 26.0f, &config, ranges);
+            config.SizePixels = 32.0f;
+            font32 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 32.0f, &config, ranges);
+            config.SizePixels = 40.0f;
+            font40 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 40.0f, &config, ranges);
+            config.SizePixels = 48.0f;
+            font48 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 48.0f, &config, ranges);
+            config.SizePixels = 60.0f;
+            font60 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 60.0f, &config, ranges);
 
-            io.InputQueueCharacters.resize(0); // clear the queue after processing
+            io.Fonts->Build();
+            fontsReady = true;
         }
-        _render(id);
-    }
-    if (display)
-    {
-        ImGui::EndChild();
-    }
-    ImGui::PopID();
-    if (useImGuiBegin)
-    {
-        ImGui::End();
-    }
-}
-
-CalcInputData ImGuiCalculatorInput::getInput(ImGuiID id)
-{
-    return inputData[id];
-}
-
-void ImGuiCalculatorInput::_render(ImGuiID id)
-{
-    auto &data = inputData[id];
-
-    ImGui::Dummy(ImVec2(0, ImGui::GetContentRegionAvail().y / 3));
-
-    float height = ImGui::GetContentRegionAvail().y / (inputRows.size() + 1);
-    ImFont* selectedFont = font13;
-    if (height > 74) selectedFont = font60;
-    else if (height > 62) selectedFont = font48;
-    else if (height > 54) selectedFont = font40;
-    else if (height > 46) selectedFont = font32;
-    else if (height > 40) selectedFont = font26;
-    else if (height > 32) selectedFont = font18;
-    ImGui::PushFont(selectedFont); // Get default font
-    ImGui::Text(data.text.c_str());
-    ImGui::NewLine();
-
-    // Total available width and height
-    float totalWidth = ImGui::GetContentRegionAvail().x;
-    float totalHeight = ImGui::GetContentRegionAvail().y;
-
-    // Calculate button width to fill the whole window evenly
-    int maxButtonsInRow = 0;
-    for (auto &row : inputRows)
-    {
-        maxButtonsInRow = std::max(maxButtonsInRow, (int)row.size());
     }
 
-    // Calculate the available space for buttons (accounting for vertical spacing between rows)
-    float spacing = ImGui::GetStyle().ItemSpacing.y; // Vertical spacing
-    float availableHeightForButtons = totalHeight - (spacing * (inputRows.size() - 1));
-    float buttonHeight = availableHeightForButtons / inputRows.size(); // Distribute height evenly across rows
-
-    // Calculate button width to fill the whole window evenly
-    float buttonWidth = (totalWidth - spacing * (maxButtonsInRow - 1)) / maxButtonsInRow;
-
-    for (auto &row : inputRows)
+    void render(const char *name, ImGuiID id, bool useImGuiBegin,
+                                    ImGuiWindowFlags flags, ImGuiChildFlags childFlags)
     {
-        for (int i = 0; i < row.size(); ++i)
+        if (!fontsReady)
         {
-            const auto &key = row[i];
-
-            if (key.exists)
+            return;
+        }
+        auto &io = ImGui::GetIO();
+        if (inputData.find(id) == inputData.end())
+        {
+            inputData[id] = CalcInputData();
+        }
+        auto &data = inputData[id];
+        bool display = true;
+        if (useImGuiBegin)
+        {
+            display = ImGui::Begin(name, nullptr, flags);
+        }
+        ImGui::PushID(ImGui::GetID("calcChild"));
+        if (display && ImGui::BeginChild(ImGui::GetID(name), ImVec2(0, 0), childFlags, flags))
+        {
+            if (!io.WantCaptureKeyboard && ImGui::IsWindowFocused())
             {
-                if (ImGui::Button(key.text.c_str(), ImVec2(buttonWidth, buttonHeight)))
+                for (int i = 0; i < io.InputQueueCharacters.Size; ++i)
                 {
-                    if (key.encoded == '\b')
-                    {
-                        if (!data.text.empty())
-                        {
-                            data.text.pop_back();
-                        }
-                        data.enterPressed = false;
-                    }
-                    else if (key.encoded == '=')
+                    ImWchar c = io.InputQueueCharacters[i];
+
+                    if (c == '\r' || c == '\n' || c == '=')
                     {
                         data.enterPressed = true;
                     }
                     else
                     {
-                        data.text += key.encoded;
+                        data.text += (char)c;
                         data.enterPressed = false;
                     }
                 }
-            }
-            else
-            {
-                ImGui::Dummy(ImVec2(buttonWidth, buttonHeight));
-            }
 
-            if (i < row.size() - 1)
-                ImGui::SameLine();
+                if (ImGui::IsKeyPressed(ImGuiKey_Backspace) && !inputData[id].text.empty())
+                {
+                    inputData[id].text.pop_back();
+                }
+
+                if (ImGui::IsKeyPressed(ImGuiKey_Enter))
+                {
+                    data.enterPressed = true;
+                }
+
+                io.InputQueueCharacters.resize(0); // clear the queue after processing
+            }
+            _render(id);
+        }
+        if (display)
+        {
+            ImGui::EndChild();
+        }
+        ImGui::PopID();
+        if (useImGuiBegin)
+        {
+            ImGui::End();
         }
     }
 
-    ImGui::PopFont();
+    CalcInputData& getInput(ImGuiID id)
+    {
+        return inputData[id];
+    }
+
+    void _render(ImGuiID id)
+    {
+        auto &data = inputData[id];
+
+        ImGui::Dummy(ImVec2(0, ImGui::GetContentRegionAvail().y / 3));
+
+        float height = ImGui::GetContentRegionAvail().y / (inputRows.size() + 1);
+        ImFont* selectedFont = font13;
+        if (height > 74) selectedFont = font60;
+        else if (height > 62) selectedFont = font48;
+        else if (height > 54) selectedFont = font40;
+        else if (height > 46) selectedFont = font32;
+        else if (height > 40) selectedFont = font26;
+        else if (height > 32) selectedFont = font18;
+        ImGui::PushFont(selectedFont); // Get default font
+        ImGui::Text(data.text.c_str());
+        ImGui::NewLine();
+
+        // Total available width and height
+        float totalWidth = ImGui::GetContentRegionAvail().x;
+        float totalHeight = ImGui::GetContentRegionAvail().y;
+
+        // Calculate button width to fill the whole window evenly
+        int maxButtonsInRow = 0;
+        for (auto &row : inputRows)
+        {
+            maxButtonsInRow = std::max(maxButtonsInRow, (int)row.size());
+        }
+
+        // Calculate the available space for buttons (accounting for vertical spacing between rows)
+        float spacing = ImGui::GetStyle().ItemSpacing.y; // Vertical spacing
+        float availableHeightForButtons = totalHeight - (spacing * (inputRows.size() - 1));
+        float buttonHeight = availableHeightForButtons / inputRows.size(); // Distribute height evenly across rows
+
+        // Calculate button width to fill the whole window evenly
+        float buttonWidth = (totalWidth - spacing * (maxButtonsInRow - 1)) / maxButtonsInRow;
+
+        for (auto &row : inputRows)
+        {
+            for (int i = 0; i < row.size(); ++i)
+            {
+                const auto &key = row[i];
+
+                if (key.exists)
+                {
+                    if (ImGui::Button(key.text.c_str(), ImVec2(buttonWidth, buttonHeight)))
+                    {
+                        if (key.encoded == '\b')
+                        {
+                            if (!data.text.empty())
+                            {
+                                data.text.pop_back();
+                            }
+                            data.enterPressed = false;
+                        }
+                        else if (key.encoded == '=')
+                        {
+                            data.enterPressed = true;
+                        }
+                        else
+                        {
+                            data.text += key.encoded;
+                            data.enterPressed = false;
+                        }
+                    }
+                }
+                else
+                {
+                    ImGui::Dummy(ImVec2(buttonWidth, buttonHeight));
+                }
+
+                if (i < row.size() - 1)
+                    ImGui::SameLine();
+            }
+        }
+
+        ImGui::PopFont();
+    }
 }

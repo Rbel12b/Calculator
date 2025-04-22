@@ -34,6 +34,9 @@
 #include <chrono>
 #include <thread>
 
+const char* calcInputName = "calcInput";
+ImGuiID calcInpuID;
+
 int App::init(const char *windowTitle)
 {
     renderer.setEventCallback([this](SDL_Event &event) { processEvents(event); });
@@ -43,7 +46,6 @@ int App::init(const char *windowTitle)
     }
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    // io.IniFilename = nullptr;
     ImGuiCalculatorInput::init();
     running = true;
     return 0;
@@ -82,6 +84,7 @@ void App::processEvents(SDL_Event &event)
     }
 }
 
+
 void App::render()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
@@ -96,8 +99,19 @@ void App::render()
         ImGui::DockSpace(dockspace_id);
     }
     ImGui::End();
+    
+    calcInpuID = ImGui::GetID(calcInputName);
 
-    ImGuiCalculatorInput::render("calc", ImGui::GetID("calc"));
+    ImGuiCalculatorInput::render(calcInputName, calcInpuID);
+
+    CalcInputData& input = ImGuiCalculatorInput::getInput(calcInpuID);
+
+    if (input.enterPressed)
+    {
+        printf("Entered: %s\n", input.text.c_str());
+        input.text.clear();
+        input.enterPressed = false;
+    }
 
     ImGui::PopStyleVar(1);
 }

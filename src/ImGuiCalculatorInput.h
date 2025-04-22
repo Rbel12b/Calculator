@@ -43,46 +43,39 @@ struct CalcInputData
     bool enterPressed = false;
 };
 
-class ImGuiCalculatorInput
+namespace ImGuiCalculatorInput
 {
-public:
-    static void init();
-    static void render(const char *name, ImGuiID id, bool useImGuiBegin = true,
+    void init();
+    void render(const char *name, ImGuiID id, bool useImGuiBegin = true,
                        ImGuiWindowFlags flags = 0, ImGuiChildFlags childFlags = 0);
-    static CalcInputData getInput(ImGuiID id);
+    CalcInputData& getInput(ImGuiID id);
 
-private:
-    static void _render(ImGuiID id);
+    void _render(ImGuiID id);
 
-private:
-    static std::unordered_map<ImGuiID, CalcInputData> inputData;
+    extern std::unordered_map<ImGuiID, CalcInputData> inputData;
 
     struct keyData
     {
         bool exists = true;
         std::string text;
         char encoded;
-        keyData()
-            : exists(false)
-        {
-        }
+        keyData() : exists(false) {}
         keyData(std::string _text, char _c)
-            : exists(true), text(_text), encoded(_c)
-        {
-        }
+            : exists(true), text(_text), encoded(_c) {}
     };
 
     typedef std::vector<keyData> InputRow;
-    static std::vector<InputRow> inputRows;
-    static bool fontsReady;
-    static ImFont* font13; // Default size (13.0f)
-    static ImFont* font18;
-    static ImFont* font26;
-    static ImFont* font32;
-    static ImFont* font30;
-    static ImFont* font40;
-    static ImFont* font48;
-    static ImFont* font60;
+
+    extern std::vector<InputRow> inputRows;
+    extern bool fontsReady;
+    extern ImFont* font13;
+    extern ImFont* font18;
+    extern ImFont* font26;
+    extern ImFont* font32;
+    extern ImFont* font30;
+    extern ImFont* font40;
+    extern ImFont* font48;
+    extern ImFont* font60;
 };
 
 #endif
