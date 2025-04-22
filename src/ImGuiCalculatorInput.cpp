@@ -115,15 +115,7 @@ namespace ImGuiCalculatorInput
                 {
                     ImWchar c = io.InputQueueCharacters[i];
 
-                    if (c == '\r' || c == '\n' || c == '=')
-                    {
-                        data.enterPressed = true;
-                    }
-                    else
-                    {
-                        data.text += (char)c;
-                        data.enterPressed = false;
-                    }
+                    addCharachter(data, c);
                 }
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Backspace) && !inputData[id].text.empty())
@@ -217,8 +209,7 @@ namespace ImGuiCalculatorInput
                         }
                         else
                         {
-                            data.text += key.encoded;
-                            data.enterPressed = false;
+                            addCharachter(data, key.encoded);
                         }
                     }
                 }
@@ -233,5 +224,58 @@ namespace ImGuiCalculatorInput
         }
 
         ImGui::PopFont();
+    }
+
+    void addCharachter(CalcInputData &data, ImWchar c)
+    {
+        if (c == '\r' || c == '\n' || c == '=')
+        {
+            data.enterPressed = true;
+        }
+        else if (c == '(' || c == ')')
+        {
+            if (data.text.empty())
+            {
+                if (c == ')')
+                {
+                    return;
+                }
+                data.enterPressed = false;
+                data.text += c;
+                return;
+            }
+
+            char lastChar = data.text.back();
+
+            if (c == '(' && (isalnum(lastChar) || lastChar == '('))
+            {
+                data.text += " * ";
+            }
+
+            data.enterPressed = false;
+            data.text += c;
+        }
+        else if (!isalnum(c) && c != '.' && c != ',' && c != ';')
+        {
+            data.enterPressed = false;
+
+            if (c == ' ')
+            {
+                return;
+            }
+
+            data.text += ' ';
+            data.text += c;
+            data.text += ' ';
+        }
+        else if (c != ' ')
+        {
+            if (!data.text.empty() && data.text.back() == ')' && isalnum(c))
+            {
+                data.text += " * ";
+            }
+            data.text += (char)c;
+            data.enterPressed = false;
+        }
     }
 }

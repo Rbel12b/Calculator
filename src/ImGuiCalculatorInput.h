@@ -51,6 +51,7 @@ namespace ImGuiCalculatorInput
     CalcInputData& getInput(ImGuiID id);
 
     void _render(ImGuiID id);
+    void addCharachter(CalcInputData &data, ImWchar c);
 
     extern std::unordered_map<ImGuiID, CalcInputData> inputData;
 
