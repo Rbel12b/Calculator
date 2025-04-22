@@ -47,11 +47,22 @@ namespace ImGuiCalculatorInput
     ImFont* font13 = nullptr;
     ImFont* font18 = nullptr;
     ImFont* font26 = nullptr;
-    ImFont* font32 = nullptr;
     ImFont* font30 = nullptr;
+    ImFont* font32 = nullptr;
     ImFont* font40 = nullptr;
     ImFont* font48 = nullptr;
     ImFont* font60 = nullptr;
+    ImFont** fontMap[8] = {
+        &font13,
+        &font18,
+        &font26,
+        &font30,
+        &font32,
+        &font40,
+        &font48,
+        &font60
+    };
+    const unsigned int numFonts = 8;
 
     void init()
     {
@@ -74,6 +85,8 @@ namespace ImGuiCalculatorInput
             font18 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 18.0f, &config, ranges);
             config.SizePixels = 26.0f;
             font26 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 26.0f, &config, ranges);
+            config.SizePixels = 30.0f;
+            font30 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 30.0f, &config, ranges);
             config.SizePixels = 32.0f;
             font32 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 32.0f, &config, ranges);
             config.SizePixels = 40.0f;
@@ -155,16 +168,39 @@ namespace ImGuiCalculatorInput
         ImGui::Dummy(ImVec2(0, ImGui::GetContentRegionAvail().y / 3));
 
         float height = ImGui::GetContentRegionAvail().y / (inputRows.size() + 1);
-        ImFont* selectedFont = font13;
-        if (height > 74) selectedFont = font60;
-        else if (height > 62) selectedFont = font48;
-        else if (height > 54) selectedFont = font40;
-        else if (height > 46) selectedFont = font32;
-        else if (height > 40) selectedFont = font26;
-        else if (height > 32) selectedFont = font18;
-        ImGui::PushFont(selectedFont); // Get default font
+
+        int fontIndex = 0;
+        while (fontIndex < 7 && height > ((*fontMap[fontIndex + 1])->FontSize + 14))
+        {
+            fontIndex++;
+        }
+        
+        ImFont* selectedFont = *fontMap[fontIndex];
+
+        int indent = -1;
+        fontIndex = 8;
+        int textHeight;
+
+        while (indent < 0 && fontIndex != 0)
+        {
+            fontIndex--;
+            auto textSize = (*fontMap[fontIndex])->CalcTextSizeA(
+                (*fontMap[fontIndex])->FontSize, FLT_MAX, 0.0f,
+                data.text.c_str());
+            int textWidth = textSize.x;
+            textHeight = textSize.y;
+            indent = ImGui::GetWindowSize().x - (textWidth + 20);
+        }
+
+        ImGui::Dummy(ImVec2(indent, 0));
+        ImGui::SameLine();
+        ImGui::PushFont(*fontMap[fontIndex]);
         ImGui::Text(data.text.c_str());
+        ImGui::PopFont();
         ImGui::NewLine();
+        ImGui::Dummy(ImVec2(0, 80 - textHeight));
+        
+        ImGui::PushFont(selectedFont); // Get default font
 
         // Total available width and height
         float totalWidth = ImGui::GetContentRegionAvail().x;
