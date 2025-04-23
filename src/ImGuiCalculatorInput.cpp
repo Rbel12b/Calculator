@@ -131,14 +131,22 @@ namespace ImGuiCalculatorInput
                     addCharachter(data, c);
                 }
 
-                if (ImGui::IsKeyPressed(ImGuiKey_Backspace) && !inputData[id].text.empty())
+                if (ImGui::IsKeyPressed(ImGuiKey_Backspace))
                 {
                     if (data.error)
                     {
                         data.text.clear();
                         data.error = false;
                     }
-                    inputData[id].text.pop_back();
+                    if (data.processed)
+                    {
+                        data.text.clear();
+                        data.processed = false;
+                    }
+                    if (!inputData[id].text.empty())
+                    {
+                        inputData[id].text.pop_back();
+                    }
                 }
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter))
@@ -254,7 +262,6 @@ namespace ImGuiCalculatorInput
                 {
                     if (ImGui::Button(key.text.c_str(), ImVec2(buttonWidth, buttonHeight)))
                     {
-                        
                         if (data.error)
                         {
                             data.text.clear();
@@ -299,6 +306,15 @@ namespace ImGuiCalculatorInput
             data.text.clear();
             data.error = false;
         }
+        if (isalnum(c) || c == ',' || c == '.' || c == ';')
+        {
+            if (data.processed)
+            {
+                data.text.clear();
+                data.processed = false;
+            }
+        }
+        data.processed = false;
         if (c == '\r' || c == '\n' || c == '=')
         {
             data.enterPressed = true;

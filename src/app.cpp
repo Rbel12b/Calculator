@@ -81,6 +81,7 @@ int App::run()
                 }
                 input.text = val;
                 input.enterPressed = false;
+                input.processed = true;
             }
         }
 

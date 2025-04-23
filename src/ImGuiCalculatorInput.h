@@ -43,6 +43,7 @@ struct CalcInputData
     std::string lastExpr;
     bool enterPressed = false;
     bool error = false;
+    bool processed = false;
 };
 
 namespace ImGuiCalculatorInput
