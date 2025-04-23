@@ -139,6 +139,7 @@ namespace ImGuiCalculatorInput
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                 {
                     data.enterPressed = true;
+                    data.lastExpr = data.text;
                 }
 
                 io.InputQueueCharacters.resize(0); // clear the queue after processing
@@ -165,7 +166,19 @@ namespace ImGuiCalculatorInput
     {
         auto &data = inputData[id];
 
-        ImGui::Dummy(ImVec2(0, ImGui::GetContentRegionAvail().y / 3));
+        ImGui::Dummy(ImVec2(0, ImGui::GetContentRegionAvail().y / 4));
+
+        int indent = ImGui::GetWindowSize().x - (font13->CalcTextSizeA(
+            font13->FontSize, FLT_MAX, 0.0f,
+            data.lastExpr.c_str()).x + 20);
+        
+        ImGui::Dummy(ImVec2(indent, 0));
+        ImGui::SameLine();
+        ImGui::PushFont(font13);
+        ImGui::Text(data.lastExpr.c_str());
+        ImGui::PopFont();
+        ImGui::NewLine();
+
 
         float height = ImGui::GetContentRegionAvail().y / (inputRows.size() + 1);
 
@@ -177,7 +190,7 @@ namespace ImGuiCalculatorInput
         
         ImFont* selectedFont = *fontMap[fontIndex];
 
-        int indent = -1;
+        indent = -1;
         fontIndex = 8;
         int textHeight;
 
@@ -242,6 +255,7 @@ namespace ImGuiCalculatorInput
                         else if (key.encoded == '=')
                         {
                             data.enterPressed = true;
+                            data.lastExpr = data.text;
                         }
                         else
                         {
@@ -267,8 +281,14 @@ namespace ImGuiCalculatorInput
         if (c == '\r' || c == '\n' || c == '=')
         {
             data.enterPressed = true;
+            data.lastExpr = data.text;
+            return;
         }
-        else if (c == '(' || c == ')')
+
+        data.enterPressed = false;
+        data.lastExpr = "";
+        
+        if (c == '(' || c == ')')
         {
             if (data.text.empty())
             {
@@ -276,7 +296,6 @@ namespace ImGuiCalculatorInput
                 {
                     return;
                 }
-                data.enterPressed = false;
                 data.text += c;
                 return;
             }
@@ -288,12 +307,10 @@ namespace ImGuiCalculatorInput
                 data.text += " * ";
             }
 
-            data.enterPressed = false;
             data.text += c;
         }
         else if (!isalnum(c) && c != '.' && c != ',' && c != ';')
         {
-            data.enterPressed = false;
 
             if (c == ' ')
             {
@@ -311,7 +328,6 @@ namespace ImGuiCalculatorInput
                 data.text += " * ";
             }
             data.text += (char)c;
-            data.enterPressed = false;
         }
     }
 }

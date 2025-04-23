@@ -40,6 +40,7 @@
 struct CalcInputData
 {
     std::string text;
+    std::string lastExpr;
     bool enterPressed = false;
 };
 
