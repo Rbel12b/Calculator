@@ -29,10 +29,12 @@
  * -----------------------------------------------------------------------------
  */
 #include "app.h"
-#include <functional>
 #include "ImGuiCalculatorInput.h"
+#include "Expression.h"
+#include <functional>
 #include <chrono>
 #include <thread>
+#include <boost/lexical_cast.hpp>
 
 const char* calcInputName = "calcInput";
 ImGuiID calcInpuID;
@@ -60,6 +62,28 @@ int App::run()
         renderer.beginFrame();
         render();
         renderer.endFrame();
+
+        {
+            CalcInputData& input = ImGuiCalculatorInput::getInput(calcInpuID);
+    
+            if (input.enterPressed)
+            {
+                Expression exp(input.text);
+                std::string val;
+                try
+                {
+                    val = boost::lexical_cast<std::string>(exp.eval());
+                }
+                catch (const std::exception& e)
+                {
+                    val = std::string("Error: ") + e.what();
+                    input.error = true;
+                }
+                input.text = val;
+                input.enterPressed = false;
+            }
+        }
+
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         if (elapsed < frame_time_ms) {
@@ -103,15 +127,6 @@ void App::render()
     calcInpuID = ImGui::GetID(calcInputName);
 
     ImGuiCalculatorInput::render(calcInputName, calcInpuID);
-
-    CalcInputData& input = ImGuiCalculatorInput::getInput(calcInpuID);
-
-    if (input.enterPressed)
-    {
-        printf("Entered: %s\n", input.text.c_str());
-        input.text.clear();
-        input.enterPressed = false;
-    }
 
     ImGui::PopStyleVar(1);
 }

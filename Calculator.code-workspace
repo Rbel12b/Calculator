@@ -72,7 +72,13 @@
 			"thread": "cpp",
 			"cinttypes": "cpp",
 			"typeinfo": "cpp",
-			"variant": "cpp"
+			"variant": "cpp",
+			"strstream": "cpp",
+			"cfenv": "cpp",
+			"complex": "cpp",
+			"source_location": "cpp",
+			"mutex": "cpp",
+			"ranges": "cpp"
 		}
 	}
 }

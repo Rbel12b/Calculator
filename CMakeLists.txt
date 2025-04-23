@@ -44,6 +44,7 @@ add_custom_command(
 
 add_custom_target(embed_fonts DEPENDS ${FONT_OUTPUT})
 add_dependencies(calculator embed_fonts)
+
 target_include_directories(calculator PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link the src library to the calculator executable
