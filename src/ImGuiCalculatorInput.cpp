@@ -133,11 +133,21 @@ namespace ImGuiCalculatorInput
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Backspace) && !inputData[id].text.empty())
                 {
+                    if (data.error)
+                    {
+                        data.text.clear();
+                        data.error = false;
+                    }
                     inputData[id].text.pop_back();
                 }
 
-                if (ImGui::IsKeyPressed(ImGuiKey_Enter))
+                if (ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter))
                 {
+                    if (data.error)
+                    {
+                        data.text.clear();
+                        data.error = false;
+                    }
                     data.enterPressed = true;
                     data.lastExpr = data.text;
                 }
@@ -244,6 +254,12 @@ namespace ImGuiCalculatorInput
                 {
                     if (ImGui::Button(key.text.c_str(), ImVec2(buttonWidth, buttonHeight)))
                     {
+                        
+                        if (data.error)
+                        {
+                            data.text.clear();
+                            data.error = false;
+                        }
                         if (key.encoded == '\b')
                         {
                             if (!data.text.empty())
@@ -278,6 +294,11 @@ namespace ImGuiCalculatorInput
 
     void addCharachter(CalcInputData &data, ImWchar c)
     {
+        if (data.error)
+        {
+            data.text.clear();
+            data.error = false;
+        }
         if (c == '\r' || c == '\n' || c == '=')
         {
             data.enterPressed = true;
