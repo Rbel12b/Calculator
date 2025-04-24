@@ -19,3 +19,4 @@ target_include_directories(imgui PUBLIC
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
 )
+target_link_libraries(imgui PRIVATE ${SDL2_LIBRARIES})
