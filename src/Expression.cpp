@@ -30,6 +30,7 @@
  */
 #include "Expression.h"
 #include <unordered_map>
+#include <cstdint>
 
 int getPrecedence(const Token &token)
 {
