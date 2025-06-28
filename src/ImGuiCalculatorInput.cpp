@@ -179,7 +179,7 @@ namespace ImGuiCalculatorInput
         if (textSize.x > ImGui::GetContentRegionAvail().x - 20)
         {
             // If the text is too wide, reduce the font size
-            fontSize = std::max(11.0f, ImGui::GetContentRegionAvail().x / textSize.x * fontSize);
+            fontSize = std::max(11.0f, (ImGui::GetContentRegionAvail().x - 40) / textSize.x * fontSize);
         }
 
         if (fontSize < 11.0f)
