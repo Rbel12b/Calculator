@@ -36,7 +36,7 @@ namespace ImGuiCalculatorInput
     std::unordered_map<ImGuiID, CalcInputData> inputData;
 
     std::vector<InputRow> inputRows = {
-        {keyData("(", '('), keyData(")", ')'), keyData(u8"\u232B", '\b')},
+        {keyData("(", '('), keyData(")", ')'), keyData("CE", '\xFF'), keyData(u8"\u232B", '\b')},
         {keyData("7", '7'), keyData("8", '8'), keyData("9", '9'), keyData("÷", '/')},
         {keyData("4", '4'), keyData("5", '5'), keyData("6", '6'), keyData("×", '*')},
         {keyData("1", '1'), keyData("2", '2'), keyData("3", '3'), keyData("+", '+')},
@@ -256,6 +256,12 @@ namespace ImGuiCalculatorInput
                         {
                             data.enterPressed = true;
                             data.lastExpr = data.text;
+                        }
+                        else if (key.encoded == '\xFF') // CE button
+                        {
+                            data.text.clear();
+                            data.enterPressed = false;
+                            data.lastExpr = "";
                         }
                         else
                         {

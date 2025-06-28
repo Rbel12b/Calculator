@@ -86,7 +86,8 @@ enum class TokenType
     UNARY_OPERATOR,
     PARENTHESIS,
     ASSIGNMENT,
-    FUNCTION_CALL
+    FUNCTION_CALL,
+    STRING_LITERAL
 };
 
 struct Token

@@ -31,6 +31,7 @@
 #include "Expression.h"
 #include <unordered_map>
 #include <cstdint>
+#include <set>
 
 int getPrecedence(const Token &token)
 {
@@ -196,34 +197,129 @@ Number Expression::eval()
 
 void Expression::tokenize()
 {
+    std::vector<std::string> rawTokens;
     std::string token;
-    Token currentToken;
     uint64_t i = 0;
+
+    static const std::set<std::string> multiCharOperators = {
+        "==", "!=", "<=", ">=", "&&", "||", "->", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<", ">>"
+    };
+
+    // First Pass: Raw token extraction
     while (i < m_expr.size())
     {
         char c = m_expr[i];
+
         if (std::isspace(c))
         {
             i++;
             continue;
         }
-        if (std::isdigit(c))
+
+        // --- STRING LITERALS ---
+        if (c == '"' || c == '\'')
+        {
+            char quote = c;
+            token.clear();
+            token += quote;
+            i++;
+            while (i < m_expr.size())
+            {
+                char ch = m_expr[i];
+                token += ch;
+                i++;
+                if (ch == '\\' && i < m_expr.size())  // Escape character
+                {
+                    token += m_expr[i];
+                    i++;
+                    continue;
+                }
+                if (ch == quote)
+                    break;
+            }
+            rawTokens.push_back(token);
+            continue;
+        }
+
+        // --- FLOATING POINT OR INTEGER NUMBERS ---
+        if (std::isdigit(c) || (c == '.' && i + 1 < m_expr.size() && std::isdigit(m_expr[i + 1])) || 
+            (c == '0' && i + 1 < m_expr.size() && (m_expr[i + 1] == 'x' || m_expr[i + 1] == 'X' || m_expr[i + 1] == 'b' || m_expr[i + 1] == 'B')))
         {
             token.clear();
-            while (i < m_expr.size() && std::isdigit(m_expr[i]))
+
+            if (m_expr[i] == '0' && i + 1 < m_expr.size() && (m_expr[i + 1] == 'x' || m_expr[i + 1] == 'X'))
             {
-                token += m_expr[i];
-                i++;
+                // Hex literal: 0x...
+                token += m_expr[i++];
+                token += m_expr[i++];
+                while (i < m_expr.size() && std::isxdigit(m_expr[i]))
+                {
+                    token += m_expr[i++];
+                }
             }
-            m_Tokens.push_back({TokenType::NUMBER, token});
+            else if (m_expr[i] == '0' && i + 1 < m_expr.size() && (m_expr[i + 1] == 'b' || m_expr[i + 1] == 'B'))
+            {
+                // Binary literal: 0b...
+                token += m_expr[i++];
+                token += m_expr[i++];
+                while (i < m_expr.size() && (m_expr[i] == '0' || m_expr[i] == '1'))
+                {
+                    token += m_expr[i++];
+                }
+            }
+            else
+            {
+                // Decimal or floating point
+                bool hasDot = false;
+                bool hasExp = false;
+                while (i < m_expr.size())
+                {
+                    char ch = m_expr[i];
+                    if (std::isdigit(ch))
+                    {
+                        token += ch;
+                        i++;
+                    }
+                    else if (ch == '.' && !hasDot)
+                    {
+                        hasDot = true;
+                        token += ch;
+                        i++;
+                    }
+                    else if ((ch == 'e' || ch == 'E') && !hasExp)
+                    {
+                        hasExp = true;
+                        token += ch;
+                        i++;
+                        if (i < m_expr.size() && (m_expr[i] == '+' || m_expr[i] == '-'))
+                        {
+                            token += m_expr[i++];
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                // Optional float suffix (f/F, l/L)
+                if (i < m_expr.size() && (m_expr[i] == 'f' || m_expr[i] == 'F' || m_expr[i] == 'l' || m_expr[i] == 'L'))
+                {
+                    token += m_expr[i++];
+                }
+            }
+
+            // Optional integer suffix (u/U, l/L, ul/UL, etc.)
+            while (i < m_expr.size() && (m_expr[i] == 'u' || m_expr[i] == 'U' || m_expr[i] == 'l' || m_expr[i] == 'L'))
+            {
+                token += m_expr[i++];
+            }
+
+            rawTokens.push_back(token);
             continue;
         }
-        if (c == '(' || c == ')')
-        {
-            m_Tokens.push_back({TokenType::PARENTHESIS, std::string(1, c)});
-            i++;
-            continue;
-        }
+
+        // --- SYMBOLS (identifiers) ---
         if (std::isalpha(c) || c == '_')
         {
             token.clear();
@@ -232,29 +328,66 @@ void Expression::tokenize()
                 token += m_expr[i];
                 i++;
             }
-            m_Tokens.push_back({TokenType::NUMBER, token});
+            rawTokens.push_back(token);
             continue;
         }
-        if (c == '+' || c == '-' || c == '*' || c == '&' || c == '=')
+
+        // --- MULTI-CHARACTER OPERATORS ---
+        bool matched = false;
+        for (int len = 3; len >= 2; --len)
         {
-            if (m_Tokens.empty() || m_Tokens.back().type != TokenType::NUMBER)
+            if (i + len <= m_expr.size())
             {
-                m_Tokens.push_back({TokenType::UNARY_OPERATOR, std::string(1, c)});
+                std::string op = m_expr.substr(i, len);
+                if (multiCharOperators.count(op))
+                {
+                    rawTokens.push_back(op);
+                    i += len;
+                    matched = true;
+                    break;
+                }
             }
+        }
+        if (matched) continue;
+
+        // --- SINGLE CHARACTER TOKEN ---
+        rawTokens.push_back(std::string(1, m_expr[i]));
+        i++;
+    }
+
+    // Second Pass: Type assignment
+    for (size_t j = 0; j < rawTokens.size(); ++j)
+    {
+        const std::string &tok = rawTokens[j];
+        TokenType type;
+
+        if (tok == "(" || tok == ")")
+        {
+            type = TokenType::PARENTHESIS;
+        }
+        else if ((tok.front() == '"' && tok.back() == '"') || (tok.front() == '\'' && tok.back() == '\''))
+        {
+            type = TokenType::STRING_LITERAL;
+        }
+        else if (std::isdigit(tok[0]) || tok[0] == '.')
+        {
+            type = TokenType::NUMBER;
+        }
+        else if (tok == "+" || tok == "-" || tok == "*" || tok == "&" || tok == "=")
+        {
+            if (m_Tokens.empty() || (m_Tokens.back().type != TokenType::NUMBER &&
+                                m_Tokens.back().type != TokenType::PARENTHESIS &&
+                                m_Tokens.back().value != ")"))
+                type = TokenType::UNARY_OPERATOR;
             else
-            {
-                m_Tokens.push_back({TokenType::OPERATOR, std::string(1, c)});
-            }
-            i++;
-            continue;
+                type = TokenType::OPERATOR;
         }
-        token.clear();
-        while (i < m_expr.size() && std::ispunct(m_expr[i]) && m_expr[i] != '(' && m_expr[i] != ')' && m_expr[i] != '[' && m_expr[i] != ']')
+        else
         {
-            token += m_expr[i];
-            i++;
+            type = TokenType::OPERATOR;
         }
-        m_Tokens.push_back({TokenType::OPERATOR, token});
+
+        m_Tokens.push_back({type, tok});
     }
 }
 
