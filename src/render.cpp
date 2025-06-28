@@ -39,10 +39,12 @@ int Renderer::init(const char* windowTitle)
     }
 
     // Create window
-    window = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    windowWidth = 800;
-    windowHeight = 600;
+    
+    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+
+    SDL_SetWindowMinimumSize(window, 400, 500);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -69,10 +71,11 @@ void Renderer::processEvents()
         {
             running = false;
         }
-        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
+        if (event.type == SDL_WINDOWEVENT &&
+            (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED))
         {
             SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-            SDL_RenderSetLogicalSize(renderer, windowWidth, windowHeight);
+            //SDL_RenderSetLogicalSize(renderer, windowWidth, windowHeight);
         }
         if (m_eventCallback)
         {

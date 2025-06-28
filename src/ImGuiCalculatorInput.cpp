@@ -44,25 +44,7 @@ namespace ImGuiCalculatorInput
     };
 
     bool fontsReady = false;
-    ImFont* font13 = nullptr;
-    ImFont* font18 = nullptr;
-    ImFont* font26 = nullptr;
-    ImFont* font30 = nullptr;
-    ImFont* font32 = nullptr;
-    ImFont* font40 = nullptr;
-    ImFont* font48 = nullptr;
-    ImFont* font60 = nullptr;
-    ImFont** fontMap[8] = {
-        &font13,
-        &font18,
-        &font26,
-        &font30,
-        &font32,
-        &font40,
-        &font48,
-        &font60
-    };
-    const unsigned int numFonts = 8;
+    ImFont* defaultFont = nullptr;
 
     void init()
     {
@@ -80,21 +62,7 @@ namespace ImGuiCalculatorInput
             config.FontDataOwnedByAtlas = false; // Don't let ImGui free the memory
 
             config.SizePixels = 13.0f;
-            font13 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 13.0f, &config, ranges);
-            config.SizePixels = 18.0f;
-            font18 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 18.0f, &config, ranges);
-            config.SizePixels = 26.0f;
-            font26 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 26.0f, &config, ranges);
-            config.SizePixels = 30.0f;
-            font30 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 30.0f, &config, ranges);
-            config.SizePixels = 32.0f;
-            font32 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 32.0f, &config, ranges);
-            config.SizePixels = 40.0f;
-            font40 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 40.0f, &config, ranges);
-            config.SizePixels = 48.0f;
-            font48 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 48.0f, &config, ranges);
-            config.SizePixels = 60.0f;
-            font60 = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 60.0f, &config, ranges);
+            defaultFont = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 13.0f, &config, ranges);
 
             io.Fonts->Build();
             fontsReady = true;
@@ -102,7 +70,7 @@ namespace ImGuiCalculatorInput
     }
 
     void render(const char *name, ImGuiID id, bool useImGuiBegin,
-                                    ImGuiWindowFlags flags, ImGuiChildFlags childFlags)
+        ImGuiWindowFlags flags, ImGuiChildFlags childFlags)
     {
         if (!fontsReady)
         {
@@ -183,55 +151,57 @@ namespace ImGuiCalculatorInput
     void _render(ImGuiID id)
     {
         auto &data = inputData[id];
+        const float minButtonAreaHeight = 300.0f; // Minimum height for the button area
+        float buttonAreaHeight = std::max(minButtonAreaHeight, ImGui::GetContentRegionAvail().y * 3 / 4 - 20); // Ensure the button area is at least minButtonAreaHeight
+        float textHeight = buttonAreaHeight / inputRows.size(); // Calculate text height based on the number of rows
 
-        ImGui::Dummy(ImVec2(0, ImGui::GetContentRegionAvail().y / 4));
+        float blankHeight = std::max(0.0f, ImGui::GetContentRegionAvail().y - (buttonAreaHeight + textHeight));
 
-        int indent = ImGui::GetWindowSize().x - (font13->CalcTextSizeA(
-            font13->FontSize, FLT_MAX, 0.0f,
+        ImGui::Dummy(ImVec2(0, blankHeight)); // Add dummy space to fill the available height
+
+        // Render the last expression with a 11px font size
+        // Calculate indentation based on the window size and the text size
+        int indent = ImGui::GetWindowSize().x - (defaultFont->CalcTextSizeA(
+            13.0f, FLT_MAX, 0.0f,
             data.lastExpr.c_str()).x + 20);
         
-        ImGui::Dummy(ImVec2(indent, 0));
+        ImGui::Dummy(ImVec2(indent, 0)); // Add dummy space for indentation
         ImGui::SameLine();
-        ImGui::PushFont(font13);
-        ImGui::Text(data.lastExpr.c_str());
+        ImGui::PushFont(defaultFont, 11.0f); 
+        ImGui::Text(data.lastExpr.c_str()); // Render the last expression with a 13px font size
         ImGui::PopFont();
         ImGui::NewLine();
 
+        // Calculate font size based on available height (make text fit nicely above the buttons)
+        float fontSize = textHeight * 0.7f;
+        ImVec2 textSize = defaultFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, data.text.c_str());
 
-        float height = ImGui::GetContentRegionAvail().y / (inputRows.size() + 1);
-
-        int fontIndex = 0;
-        while (fontIndex < 7 && height > ((*fontMap[fontIndex + 1])->FontSize + 14))
+        if (textSize.x > ImGui::GetContentRegionAvail().x - 20)
         {
-            fontIndex++;
+            // If the text is too wide, reduce the font size
+            fontSize = std::max(11.0f, ImGui::GetContentRegionAvail().x / textSize.x * fontSize);
         }
-        
-        ImFont* selectedFont = *fontMap[fontIndex];
 
-        indent = -1;
-        fontIndex = 8;
-        int textHeight;
-
-        while (indent < 0 && fontIndex != 0)
+        if (fontSize < 11.0f)
         {
-            fontIndex--;
-            auto textSize = (*fontMap[fontIndex])->CalcTextSizeA(
-                (*fontMap[fontIndex])->FontSize, FLT_MAX, 0.0f,
-                data.text.c_str());
-            int textWidth = textSize.x;
-            textHeight = textSize.y;
-            indent = ImGui::GetWindowSize().x - (textWidth + 20);
+            fontSize = 11.0f; // Ensure a minimum font size
         }
+
+        indent = ImGui::GetWindowSize().x - (defaultFont->CalcTextSizeA(
+            fontSize, FLT_MAX, 0.0f,
+            data.text.c_str()).x + 20);
 
         ImGui::Dummy(ImVec2(indent, 0));
         ImGui::SameLine();
-        ImGui::PushFont(*fontMap[fontIndex]);
+        ImGui::PushFont(defaultFont, fontSize);
         ImGui::Text(data.text.c_str());
         ImGui::PopFont();
-        ImGui::NewLine();
-        ImGui::Dummy(ImVec2(0, 80 - textHeight));
-        
-        ImGui::PushFont(selectedFont); // Get default font
+        ImGui::Dummy(ImVec2(0, 80 - fontSize)); // Add some space after the text
+
+        if (buttonAreaHeight > 600)
+        {
+            ImGui::Dummy(ImVec2(0, buttonAreaHeight - 600));
+        }
 
         // Total available width and height
         float totalWidth = ImGui::GetContentRegionAvail().x;
@@ -248,6 +218,13 @@ namespace ImGuiCalculatorInput
         float spacing = ImGui::GetStyle().ItemSpacing.y; // Vertical spacing
         float availableHeightForButtons = totalHeight - (spacing * (inputRows.size() - 1));
         float buttonHeight = availableHeightForButtons / inputRows.size(); // Distribute height evenly across rows
+
+        fontSize = buttonHeight * 0.7f; // Adjust font size to fit within button height
+        if (fontSize < 11.0f)
+        {
+            fontSize = 11.0f; // Ensure a minimum font size
+        }
+        ImGui::PushFont(defaultFont, fontSize);
 
         // Calculate button width to fill the whole window evenly
         float buttonWidth = (totalWidth - spacing * (maxButtonsInRow - 1)) / maxButtonsInRow;

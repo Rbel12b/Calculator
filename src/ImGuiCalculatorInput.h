@@ -72,17 +72,7 @@ namespace ImGuiCalculatorInput
 
     extern std::vector<InputRow> inputRows;
     extern bool fontsReady;
-    extern ImFont* font13;
-    extern ImFont* font18;
-    extern ImFont* font26;
-    extern ImFont* font30;
-    extern ImFont* font32;
-    extern ImFont* font40;
-    extern ImFont* font48;
-    extern ImFont* font60;
-
-    extern const unsigned int numFonts;
-    extern ImFont** fontMap[8];
+    extern ImFont* defaultFont;
 };
 
 #endif

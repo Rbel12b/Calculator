@@ -46,8 +46,8 @@ int App::init(const char *windowTitle)
     {
         return -1;
     }
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // ImGuiIO& io = ImGui::GetIO();
+    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ImGuiCalculatorInput::init();
     running = true;
     return 0;
@@ -115,19 +115,12 @@ void App::render()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::SetNextWindowPos(ImVec2(0,0));
     ImGui::SetNextWindowSize(renderer.getWindowSize());
-
-    if (ImGui::Begin("mainWindow", nullptr,
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
-    {
-        // Fill the entire window with a dock space
-        ImGuiID dockspace_id = ImGui::GetID("MainDockspace");
-        ImGui::DockSpace(dockspace_id);
-    }
-    ImGui::End();
     
     calcInpuID = ImGui::GetID(calcInputName);
 
-    ImGuiCalculatorInput::render(calcInputName, calcInpuID);
+    ImGuiCalculatorInput::render(calcInputName, calcInpuID, true,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
     ImGui::PopStyleVar(1);
 }
