@@ -72,7 +72,9 @@ int App::run()
                 std::string val;
                 try
                 {
-                    val = boost::lexical_cast<std::string>(exp.eval());
+                    std::ostringstream oss;
+                    oss << exp.eval();
+                    val = oss.str();
                 }
                 catch (const std::exception& e)
                 {
