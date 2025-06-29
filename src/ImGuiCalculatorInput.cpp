@@ -246,7 +246,15 @@ namespace ImGuiCalculatorInput
                         }
                         if (key.encoded == '\b')
                         {
+                            while (!data.text.empty() && (data.text.back() == ' ' || data.text.back() == '\t'))
+                            {
+                                data.text.pop_back();
+                            }
                             if (!data.text.empty())
+                            {
+                                data.text.pop_back();
+                            }
+                            while (!data.text.empty() && (data.text.back() == ' ' || data.text.back() == '\t'))
                             {
                                 data.text.pop_back();
                             }

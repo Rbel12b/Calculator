@@ -41,8 +41,8 @@
 
 class NumberClass;
 
-// using Number = NumberClass;
-using Number = double;
+using Number = NumberClass;
+// using Number = double;
 
 class NumberClass {
 public:
@@ -64,8 +64,34 @@ public:
     NumberClass() = default;
     NumberClass(int val) : rationalPart(val) {}
     NumberClass(const BigRational& val) : rationalPart(val) {}
+    NumberClass(double val) : rationalPart(BigRational(val)) {}
     NumberClass(BigRational rational, BigRational irrational, Tag t)
         : rationalPart(std::move(rational)), irrationalPart(std::move(irrational)), tag(t) {}
+    NumberClass(std::string str) {
+        try {
+            rationalPart = BigRational(str);
+            tag = Tag::None;
+            irrationalPart = 0; // No irrational part
+        } catch (const std::exception& e) {
+            // If parsing fails, we assume it's a string with a decimal
+            if (str.find('.') != std::string::npos) {
+                rationalPart = BigRational(std::stod(str));
+                tag = Tag::None;
+                irrationalPart = 0; // No irrational part
+            }
+        }
+        // Attempt to parse the string for irrational parts
+        if (str.find("pi") != std::string::npos || str.find("π") != std::string::npos) {
+            tag = Tag::Pi;
+            irrationalPart = 1; // Default coefficient for π
+        } else if (str.find("e") != std::string::npos) {
+            tag = Tag::E;
+            irrationalPart = 1; // Default coefficient for e
+        } else if (str.find("sqrt(2)") != std::string::npos || str.find("√2") != std::string::npos) {
+            tag = Tag::Sqrt2;
+            irrationalPart = 1; // Default coefficient for √2
+        }
+    }
 
     static NumberClass pi(BigRational coeff = 1) { return NumberClass(0, coeff, Tag::Pi); }
     static NumberClass e(BigRational coeff = 1)  { return NumberClass(0, coeff, Tag::E); }
@@ -122,7 +148,7 @@ public:
 
     // Stream output
     friend std::ostream& operator<<(std::ostream& os, const NumberClass& n) {
-        os << n.rationalPart;
+        os << n.rationalPart.convert_to<double>();
         if (n.tag != Tag::None && n.irrationalPart != 0) {
             os << " + " << n.irrationalPart << "*";
             switch (n.tag) {

@@ -178,7 +178,7 @@ LiteralNode::LiteralNode(Number val) : value(std::move(val)) {}
 
 LiteralNode::LiteralNode(std::string val)
 {
-    value = std::strtod(val.c_str(), nullptr);
+    value = Number(val);
 }
 
 Number LiteralNode::evaluate()
