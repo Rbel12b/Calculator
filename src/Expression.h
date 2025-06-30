@@ -78,7 +78,6 @@ public:
     Number evaluate() override;
 };
 
-
 enum class TokenType
 {
     NUMBER,
@@ -108,7 +107,7 @@ public:
     }
 
     Number eval();
-    
+
 private:
     void tokenize();
     void parse();

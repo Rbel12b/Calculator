@@ -36,11 +36,40 @@
 int getPrecedence(const Token &token)
 {
     const std::unordered_map<std::string, int> precedence = {
-        {"++", 15}, {"--", 15}, {"*", 14}, {"/", 14}, {"%", 14},
-        {"+", 13}, {"-", 13}, {"<<", 12}, {">>", 12}, {"<", 11}, {">", 11}, {"<=", 11}, {">=", 11},
-        {"==", 10}, {"!=", 10}, {"&", 9}, {"^", 8}, {"|", 7}, {"&&", 6}, {"||", 5}, {"?", 4}, {":", 4},
-        {"=", 3}, {"+=", 3}, {"-=", 3}, {"*=", 3}, {"/=", 3}, {"%=", 3}, {"<<=", 3}, {">>=", 3},
-        {"&=", 3}, {"^=", 3}, {"|=", 3}, {",", 2},
+        {"++", 15},
+        {"--", 15},
+        {"*", 14},
+        {"/", 14},
+        {"%", 14},
+        {"+", 13},
+        {"-", 13},
+        {"<<", 12},
+        {">>", 12},
+        {"<", 11},
+        {">", 11},
+        {"<=", 11},
+        {">=", 11},
+        {"==", 10},
+        {"!=", 10},
+        {"&", 9},
+        {"^", 8},
+        {"|", 7},
+        {"&&", 6},
+        {"||", 5},
+        {"?", 4},
+        {":", 4},
+        {"=", 3},
+        {"+=", 3},
+        {"-=", 3},
+        {"*=", 3},
+        {"/=", 3},
+        {"%=", 3},
+        {"<<=", 3},
+        {">>=", 3},
+        {"&=", 3},
+        {"^=", 3},
+        {"|=", 3},
+        {",", 2},
     };
 
     if (token.type == TokenType::PARENTHESIS)
@@ -48,7 +77,7 @@ int getPrecedence(const Token &token)
         return 0;
     }
     else if (token.type == TokenType::UNARY_OPERATOR)
-    {    
+    {
         return 16;
     }
     else if (precedence.find(token.value) != precedence.end())
@@ -202,8 +231,7 @@ void Expression::tokenize()
     uint64_t i = 0;
 
     static const std::set<std::string> multiCharOperators = {
-        "==", "!=", "<=", ">=", "&&", "||", "->", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<", ">>"
-    };
+        "==", "!=", "<=", ">=", "&&", "||", "->", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<", ">>"};
 
     // First Pass: Raw token extraction
     while (i < m_expr.size())
@@ -228,7 +256,7 @@ void Expression::tokenize()
                 char ch = m_expr[i];
                 token += ch;
                 i++;
-                if (ch == '\\' && i < m_expr.size())  // Escape character
+                if (ch == '\\' && i < m_expr.size()) // Escape character
                 {
                     token += m_expr[i];
                     i++;
@@ -242,7 +270,7 @@ void Expression::tokenize()
         }
 
         // --- FLOATING POINT OR INTEGER NUMBERS ---
-        if (std::isdigit(c) || (c == '.' && i + 1 < m_expr.size() && std::isdigit(m_expr[i + 1])) || 
+        if (std::isdigit(c) || (c == '.' && i + 1 < m_expr.size() && std::isdigit(m_expr[i + 1])) ||
             (c == '0' && i + 1 < m_expr.size() && (m_expr[i + 1] == 'x' || m_expr[i + 1] == 'X' || m_expr[i + 1] == 'b' || m_expr[i + 1] == 'B')))
         {
             token.clear();
@@ -348,7 +376,8 @@ void Expression::tokenize()
                 }
             }
         }
-        if (matched) continue;
+        if (matched)
+            continue;
 
         // --- SINGLE CHARACTER TOKEN ---
         rawTokens.push_back(std::string(1, m_expr[i]));
@@ -376,8 +405,8 @@ void Expression::tokenize()
         else if (tok == "+" || tok == "-" || tok == "*" || tok == "&" || tok == "=")
         {
             if (m_Tokens.empty() || (m_Tokens.back().type != TokenType::NUMBER &&
-                                m_Tokens.back().type != TokenType::PARENTHESIS &&
-                                m_Tokens.back().value != ")"))
+                                     m_Tokens.back().type != TokenType::PARENTHESIS &&
+                                     m_Tokens.back().value != ")"))
                 type = TokenType::UNARY_OPERATOR;
             else
                 type = TokenType::OPERATOR;

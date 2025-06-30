@@ -50,8 +50,8 @@ namespace ImGuiCalculatorInput
 {
     void init();
     void render(const char *name, ImGuiID id, bool useImGuiBegin = true,
-                       ImGuiWindowFlags flags = 0, ImGuiChildFlags childFlags = 0);
-    CalcInputData& getInput(ImGuiID id);
+                ImGuiWindowFlags flags = 0, ImGuiChildFlags childFlags = 0);
+    CalcInputData &getInput(ImGuiID id);
 
     void _render(ImGuiID id);
     void addCharachter(CalcInputData &data, ImWchar c);
@@ -72,7 +72,7 @@ namespace ImGuiCalculatorInput
 
     extern std::vector<InputRow> inputRows;
     extern bool fontsReady;
-    extern ImFont* defaultFont;
+    extern ImFont *defaultFont;
 };
 
 #endif

@@ -37,7 +37,7 @@
 class App
 {
 public:
-    App(){}
+    App() {}
     ~App()
     {
         if (running)
@@ -46,12 +46,14 @@ public:
         }
     }
 
-    int init(const char* windowTitle);
+    int init(const char *windowTitle);
     int run();
     void shutdown();
+
 private:
     void processEvents(SDL_Event &event);
     void render();
+
 private:
     bool running = false;
     Renderer renderer;

@@ -29,7 +29,7 @@
  * -----------------------------------------------------------------------------
  */
 #include "ImGuiCalculatorInput.h"
-#include "dejavusans_ttf.h" 
+#include "dejavusans_ttf.h"
 
 namespace ImGuiCalculatorInput
 {
@@ -44,25 +44,25 @@ namespace ImGuiCalculatorInput
     };
 
     bool fontsReady = false;
-    ImFont* defaultFont = nullptr;
+    ImFont *defaultFont = nullptr;
 
     void init()
     {
         if (!fontsReady)
         {
-            ImGuiIO& io = ImGui::GetIO();
+            ImGuiIO &io = ImGui::GetIO();
 
             static const ImWchar ranges[] = {
                 0x0020, 0x00FF, // Basic Latin + Latin Supplement
                 0x2200, 0x22FF, // Mathematical Operators
                 0x2300, 0x23FF, // Misc Technical (⌫ is here at U+232B)
-                0,             // End of ranges
+                0,              // End of ranges
             };
             ImFontConfig config;
             config.FontDataOwnedByAtlas = false; // Don't let ImGui free the memory
 
             config.SizePixels = 13.0f;
-            defaultFont = io.Fonts->AddFontFromMemoryTTF((void*)DejaVuSans_ttf, DejaVuSans_ttf_len, 13.0f, &config, ranges);
+            defaultFont = io.Fonts->AddFontFromMemoryTTF((void *)DejaVuSans_ttf, DejaVuSans_ttf_len, 13.0f, &config, ranges);
 
             io.Fonts->Build();
             fontsReady = true;
@@ -70,7 +70,7 @@ namespace ImGuiCalculatorInput
     }
 
     void render(const char *name, ImGuiID id, bool useImGuiBegin,
-        ImGuiWindowFlags flags, ImGuiChildFlags childFlags)
+                ImGuiWindowFlags flags, ImGuiChildFlags childFlags)
     {
         if (!fontsReady)
         {
@@ -143,7 +143,7 @@ namespace ImGuiCalculatorInput
         }
     }
 
-    CalcInputData& getInput(ImGuiID id)
+    CalcInputData &getInput(ImGuiID id)
     {
         return inputData[id];
     }
@@ -151,9 +151,9 @@ namespace ImGuiCalculatorInput
     void _render(ImGuiID id)
     {
         auto &data = inputData[id];
-        const float minButtonAreaHeight = 300.0f; // Minimum height for the button area
+        const float minButtonAreaHeight = 300.0f;                                                              // Minimum height for the button area
         float buttonAreaHeight = std::max(minButtonAreaHeight, ImGui::GetContentRegionAvail().y * 3 / 4 - 20); // Ensure the button area is at least minButtonAreaHeight
-        float textHeight = buttonAreaHeight / inputRows.size(); // Calculate text height based on the number of rows
+        float textHeight = buttonAreaHeight / inputRows.size();                                                // Calculate text height based on the number of rows
 
         float blankHeight = std::max(0.0f, ImGui::GetContentRegionAvail().y - (buttonAreaHeight + textHeight));
 
@@ -162,12 +162,14 @@ namespace ImGuiCalculatorInput
         // Render the last expression with a 11px font size
         // Calculate indentation based on the window size and the text size
         int indent = ImGui::GetWindowSize().x - (defaultFont->CalcTextSizeA(
-            13.0f, FLT_MAX, 0.0f,
-            data.lastExpr.c_str()).x + 20);
-        
+                                                                13.0f, FLT_MAX, 0.0f,
+                                                                data.lastExpr.c_str())
+                                                     .x +
+                                                 20);
+
         ImGui::Dummy(ImVec2(indent, 0)); // Add dummy space for indentation
         ImGui::SameLine();
-        ImGui::PushFont(defaultFont, 11.0f); 
+        ImGui::PushFont(defaultFont, 11.0f);
         ImGui::Text(data.lastExpr.c_str()); // Render the last expression with a 13px font size
         ImGui::PopFont();
         ImGui::NewLine();
@@ -188,8 +190,10 @@ namespace ImGuiCalculatorInput
         }
 
         indent = ImGui::GetWindowSize().x - (defaultFont->CalcTextSizeA(
-            fontSize, FLT_MAX, 0.0f,
-            data.text.c_str()).x + 20);
+                                                            fontSize, FLT_MAX, 0.0f,
+                                                            data.text.c_str())
+                                                 .x +
+                                             20);
 
         ImGui::Dummy(ImVec2(indent, 0));
         ImGui::SameLine();
@@ -315,7 +319,7 @@ namespace ImGuiCalculatorInput
 
         data.enterPressed = false;
         data.lastExpr = "";
-        
+
         if (c == '(' || c == ')')
         {
             if (data.text.empty())

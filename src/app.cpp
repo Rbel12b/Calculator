@@ -36,13 +36,14 @@
 #include <thread>
 #include <boost/lexical_cast.hpp>
 
-const char* calcInputName = "calcInput";
+const char *calcInputName = "calcInput";
 ImGuiID calcInpuID;
 
 int App::init(const char *windowTitle)
 {
-    renderer.setEventCallback([this](SDL_Event &event) { processEvents(event); });
-    if(renderer.init(windowTitle))
+    renderer.setEventCallback([this](SDL_Event &event)
+                              { processEvents(event); });
+    if (renderer.init(windowTitle))
     {
         return -1;
     }
@@ -64,8 +65,8 @@ int App::run()
         renderer.endFrame();
 
         {
-            CalcInputData& input = ImGuiCalculatorInput::getInput(calcInpuID);
-    
+            CalcInputData &input = ImGuiCalculatorInput::getInput(calcInpuID);
+
             if (input.enterPressed)
             {
                 Expression exp(input.text);
@@ -76,7 +77,7 @@ int App::run()
                     oss << exp.eval();
                     val = oss.str();
                 }
-                catch (const std::exception& e)
+                catch (const std::exception &e)
                 {
                     val = std::string("Error: ") + e.what();
                     input.error = true;
@@ -89,7 +90,8 @@ int App::run()
 
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-        if (elapsed < frame_time_ms) {
+        if (elapsed < frame_time_ms)
+        {
             std::this_thread::sleep_for(std::chrono::milliseconds(frame_time_ms - elapsed));
         }
     }
@@ -111,18 +113,17 @@ void App::processEvents(SDL_Event &event)
     }
 }
 
-
 void App::render()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-    ImGui::SetNextWindowPos(ImVec2(0,0));
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(renderer.getWindowSize());
-    
+
     calcInpuID = ImGui::GetID(calcInputName);
 
     ImGuiCalculatorInput::render(calcInputName, calcInpuID, true,
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
+                                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
     ImGui::PopStyleVar(1);
 }

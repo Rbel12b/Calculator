@@ -43,7 +43,6 @@ class Renderer
 public:
     Renderer()
     {
-
     }
     ~Renderer()
     {
@@ -53,7 +52,7 @@ public:
         }
     }
 
-    int init(const char* windowTitle);
+    int init(const char *windowTitle);
     void beginFrame();
     void endFrame();
     void shutdown();
@@ -62,7 +61,7 @@ public:
     {
         return running;
     }
-    void setEventCallback(std::function<void(SDL_Event&)> callback)
+    void setEventCallback(std::function<void(SDL_Event &)> callback)
     {
         m_eventCallback = callback;
     }
@@ -70,13 +69,14 @@ public:
     {
         return ImVec2(windowWidth, windowHeight);
     }
+
 private:
     bool running = false;
     int windowHeight, windowWidth;
     SDL_Event event;
     SDL_Window *window;
     SDL_Renderer *renderer;
-    std::function<void(SDL_Event&)> m_eventCallback = nullptr;
+    std::function<void(SDL_Event &)> m_eventCallback = nullptr;
 };
 
 #endif

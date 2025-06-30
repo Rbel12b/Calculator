@@ -30,7 +30,7 @@
  */
 #include "render.h"
 
-int Renderer::init(const char* windowTitle)
+int Renderer::init(const char *windowTitle)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -41,7 +41,7 @@ int Renderer::init(const char* windowTitle)
     // Create window
     window = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    
+
     SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 
     SDL_SetWindowMinimumSize(window, 400, 500);
@@ -75,7 +75,7 @@ void Renderer::processEvents()
             (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED))
         {
             SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-            //SDL_RenderSetLogicalSize(renderer, windowWidth, windowHeight);
+            // SDL_RenderSetLogicalSize(renderer, windowWidth, windowHeight);
         }
         if (m_eventCallback)
         {
